@@ -20,6 +20,8 @@ A React application built with Vite and Tailwind CSS.
    npm run build
    ```
 
+5. Add your `VITE_OPENWEATHER_KEY` in `.env`
+
 ## Screenshots
 
 ### New York Screenshot
