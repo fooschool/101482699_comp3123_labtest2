@@ -70,7 +70,7 @@ function App() {
 	return (
 		<div className="flex flex-col items-center gap-4">
 			<Search onSearch={setSearch}></Search>
-			<div className="w-full max-w-200 flex-none rounded-2xl bg-stone-800 p-10">
+			<div className="w-full max-w-150 flex-none rounded-2xl bg-stone-800 p-5 md:p-10">
 				{!data && (
 					<h1 className="text-4xl font-bold md:text-6xl">
 						{loading && <span>Loading...</span>}
@@ -81,7 +81,7 @@ function App() {
 				{error && <p className="text-red-400">{error}</p>}
 
 				{data && (
-					<div className="relative flex gap-5">
+					<div className="relative flex flex-col gap-5 sm:flex-row md:gap-12">
 						<div className="flex flex-1 flex-col gap-2">
 							<h2 className="text-2xl font-bold">
 								{new Date((data.dt + data.timezone) * 1000).toLocaleDateString('en-US', {
@@ -111,12 +111,40 @@ function App() {
 						</div>
 
 						<div className="flex flex-3 flex-col gap-2">
-							<span>Condition: {data.weather[0].main}</span>
+							<span className="flex justify-between">
+								<b>Description</b> <span>{data.weather[0].description}</span>
+							</span>
 
+							<span className="flex justify-between">
+								<b>Condition</b> <span>{data.weather[0].main}</span>
+							</span>
 
-							<span>Humidity: {data.main.humidity}%</span>
+							<span className="flex justify-between">
+								<b>Humidity</b> <span>{data.main.humidity}%</span>
+							</span>
 
-							<span>Wind: {data.wind.speed} m/s</span>
+							<span className="flex justify-between">
+								<b>Wind</b> <span>{data.wind.speed} m/s</span>
+							</span>
+
+							<span className="flex justify-between">
+								<b>Feels like</b> <span>{data.main.feels_like}°C</span>
+							</span>
+
+							<span className="flex justify-between">
+								<b>Min / Max</b>{' '}
+								<span>
+									{data.main.temp_min}°C / {data.main.temp_max}°C
+								</span>
+							</span>
+
+							<span className="flex justify-between">
+								<b>Pressure</b> <span>{data.main.pressure} hPa</span>
+							</span>
+
+							<span className="flex justify-between">
+								<b>Visibility</b> <span>{data.visibility / 1000} km</span>
+							</span>
 						</div>
 					</div>
 				)}
