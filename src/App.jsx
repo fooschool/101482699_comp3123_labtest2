@@ -3,6 +3,14 @@ import './index.css';
 
 const API_KEY = import.meta.env.VITE_OPENWEATHER_KEY;
 
+function Card(props) {
+	return (
+		<div className="flex flex-col items-center justify-center gap-2 rounded-3xl bg-stone-900 p-3">
+			{props.children}
+		</div>
+	);
+}
+
 function Search({ onSearch }) {
 	return (
 		<>
@@ -35,6 +43,8 @@ function App() {
 	const [error, setError] = useState(null);
 	const [loading, setLoading] = useState(false);
 
+	const [showJson, setShowJson] = useState('');
+
 	useEffect(() => {
 		if (!search) return;
 
@@ -61,56 +71,66 @@ function App() {
 		<div className="flex flex-col items-center gap-4">
 			<Search onSearch={setSearch}></Search>
 			<div className="w-full max-w-200 flex-none rounded-2xl bg-stone-800 p-10">
-				<h1 className="text-4xl font-bold md:text-6xl">
-					{loading && <span>Loading...</span>}
-					{!search && !loading && !error && <span>No search</span>}
-					{data && (
-						<span>
-							{data.name}, {data.sys.country}
-						</span>
-					)}
-				</h1>
+				{!data && (
+					<h1 className="text-4xl font-bold md:text-6xl">
+						{loading && <span>Loading...</span>}
+						{!search && !loading && !error && <span>No search</span>}
+					</h1>
+				)}
 
 				{error && <p className="text-red-400">{error}</p>}
+
+				{data && (
+					<div className="relative flex gap-5">
+						<div className="flex flex-1 flex-col gap-2">
+							<h2 className="text-2xl font-bold">
+								{new Date((data.dt + data.timezone) * 1000).toLocaleDateString('en-US', {
+									weekday: 'long',
+								})}
+							</h2>
+
+							<span>
+								{new Date((data.dt + data.timezone) * 1000).toLocaleDateString('en-US', {
+									day: 'numeric',
+									month: 'short',
+									year: 'numeric',
+								})}
+							</span>
+
+							<span>
+								{data.name}, {data.sys.country}
+							</span>
+
+							<Card>
+								<img
+									className="pointer-events-none size-12 scale-200 select-none"
+									src={`https://openweathermap.org/img/wn/${data.weather[0].icon}@4x.png`}
+								></img>
+								<span>{data.main.temp}°C</span>
+							</Card>
+						</div>
+
+						<div className="flex flex-3 flex-col gap-2">
+							<span>Condition: {data.weather[0].main}</span>
+
+
+							<span>Humidity: {data.main.humidity}%</span>
+
+							<span>Wind: {data.wind.speed} m/s</span>
+						</div>
+					</div>
+				)}
 			</div>
 
-			{data && (
-				<div>
-					<li>
-						Weekday:{' '}
-						{new Date((data.dt + data.timezone) * 1000).toLocaleDateString('en-US', {
-							weekday: 'long',
-						})}
-					</li>
-
-					<li>
-						Date:{' '}
-						{new Date((data.dt + data.timezone) * 1000).toLocaleDateString('en-US', {
-							day: 'numeric',
-							month: 'short',
-							year: 'numeric',
-						})}
-					</li>
-
-					<li>
-						Location: {data.name}, {data.sys.country}
-					</li>
-
-					<li>Icon: https://openweathermap.org/img/wn/{data.weather[0].icon}@4x.png</li>
-
-					<li>Temperature: {data.main.temp}°C</li>
-
-					<li>Condition: {data.weather[0].main}</li>
-
-					<li>UV Index: {data.uv}</li>
-
-					<li>Humidity: {data.main.humidity}%</li>
-
-					<li>Wind: {data.wind.speed} m/s</li>
-				</div>
-			)}
-
-			<pre>{JSON.stringify(data, null, 2)}</pre>
+			<button
+				className="cursor-pointer"
+				onClick={() => {
+					setShowJson(!showJson);
+				}}
+			>
+				View raw json
+			</button>
+			<pre className={!showJson && 'hidden'}>{JSON.stringify(data, null, 2)}</pre>
 		</div>
 	);
 }
