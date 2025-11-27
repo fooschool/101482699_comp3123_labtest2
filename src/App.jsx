@@ -2,9 +2,6 @@ import { useState, useEffect } from 'react';
 import './index.css';
 
 const API_KEY = import.meta.env.VITE_OPENWEATHER_KEY;
-function query(cityName) {
-	return `https://api.openweathermap.org/data/2.5/weather?q=${cityName}&appid=${API_KEY}`;
-}
 
 function Search({ onSearch }) {
 	return (
@@ -41,28 +38,23 @@ function App() {
 	useEffect(() => {
 		if (!search) return;
 
-		const fetchWeather = async () => {
+		const run = async () => {
 			setLoading(true);
 			setError(null);
-			try {
-				const response = await fetch(query(search));
-				const json = await response.json();
-				if (response.status == 404) {
-					setError('Location not found');
-					return;
-				}
+			setData(null);
 
-				console.log(json);
-				setData(json);
-			} catch (err) {
-				setError(err.message);
-				setData(null);
-			} finally {
-				setLoading(false);
+			const result = await query(search);
+
+			if (!result.ok) {
+				setError(result.error);
+			} else {
+				setData(result.weather);
 			}
+
+			setLoading(false);
 		};
 
-		fetchWeather();
+		run();
 	}, [search]);
 
 	return (
@@ -71,14 +63,84 @@ function App() {
 			<div className="w-full max-w-200 flex-none rounded-2xl bg-stone-800 p-10">
 				<h1 className="text-4xl font-bold md:text-6xl">
 					{loading && <span>Loading...</span>}
-					{error && <span>{error}</span>}
 					{!search && !loading && !error && <span>No search</span>}
-					{data && <span>{search}</span>}
+					{data && (
+						<span>
+							{data.name}, {data.sys.country}
+						</span>
+					)}
 				</h1>
+
+				{error && <p className="text-red-400">{error}</p>}
 			</div>
+
+			{data && (
+				<div>
+					<li>
+						Weekday:{' '}
+						{new Date((data.dt + data.timezone) * 1000).toLocaleDateString('en-US', {
+							weekday: 'long',
+						})}
+					</li>
+
+					<li>
+						Date:{' '}
+						{new Date((data.dt + data.timezone) * 1000).toLocaleDateString('en-US', {
+							day: 'numeric',
+							month: 'short',
+							year: 'numeric',
+						})}
+					</li>
+
+					<li>
+						Location: {data.name}, {data.sys.country}
+					</li>
+
+					<li>Icon: https://openweathermap.org/img/wn/{data.weather[0].icon}@4x.png</li>
+
+					<li>Temperature: {data.main.temp}°C</li>
+
+					<li>Condition: {data.weather[0].main}</li>
+
+					<li>UV Index: {data.uv}</li>
+
+					<li>Humidity: {data.main.humidity}%</li>
+
+					<li>Wind: {data.wind.speed} m/s</li>
+				</div>
+			)}
 
 			<pre>{JSON.stringify(data, null, 2)}</pre>
 		</div>
 	);
 }
+
+async function query(cityName) {
+	try {
+		const weatherResponse = await fetch(
+			`https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(
+				cityName,
+			)}&appid=${API_KEY}&units=metric`,
+		);
+
+		const weather = await weatherResponse.json();
+		if (!weatherResponse.ok) {
+			return {
+				ok: false,
+				error: `${weatherResponse.status}: ${weather?.message || 'Error'}`,
+			};
+		}
+
+		return {
+			ok: true,
+			weather: weather,
+		};
+	} catch (err) {
+		return {
+			ok: false,
+			error: `Network error: ${err.message}`,
+		};
+	}
+}
+
 export default App;
