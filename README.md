@@ -30,6 +30,9 @@ A React application built with Vite and Tailwind CSS.
 ### Vaughan Screenshot
 ![VaughanScreenshot](./docs/VaughanScreenshot.png)
 
+### Error
+![Error](./docs/Error.png)
+
 ### Postman
 ![Postman](./docs/Postman.png)
 
